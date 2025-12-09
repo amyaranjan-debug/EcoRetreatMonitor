@@ -16,12 +16,18 @@ HOTEL_IDS = ["41", "37", "43"]
 # ✅ DATE RANGE TO SCAN
 WATCH_DATES = {
     "2025-12-21",
-    "2025-12-22",
-    "2025-12-23"
+    "2025-12-22"
 }
 
 CHECKIN_START = datetime(2025, 12, 20)
 CHECKIN_END   = datetime(2025, 12, 24)
+
+HOTEL_MAP = {
+    "37": "Konark",
+    "41": "Satkosia",
+    "43": "Sonapur",
+}
+
 
 # ✅ TELEGRAM SECRETS (FROM GITHUB)
 TELEGRAM_TOKEN = os.getenv("TG_TOKEN")
@@ -172,14 +178,26 @@ def main():
                     if already_alerted(alert_key):
                         continue
 
+                    # msg = (
+                    #     f"🏨 <b>ROOM AVAILABLE</b>\n"
+                    #     f"🏷 Hotel ID: {r['hotel_id']}\n"
+                    #     f"📅 {r['date']} ({r['weekday']})\n"
+                    #     f"🛏 {r['room']}\n"
+                    #     f"💰 ₹{r['price']}\n"
+                    #     f"📦 Qty: {r['qty']}"
+                    # )
+                    location = HOTEL_MAP.get(hotel, "Unknown")
+
                     msg = (
                         f"🏨 <b>ROOM AVAILABLE</b>\n"
-                        f"🏷 Hotel ID: {r['hotel_id']}\n"
+                        f"📍 Location: <b>{location}</b>\n"
+                        f"🏷 Hotel ID: {hotel}\n"
                         f"📅 {r['date']} ({r['weekday']})\n"
                         f"🛏 {r['room']}\n"
                         f"💰 ₹{r['price']}\n"
                         f"📦 Qty: {r['qty']}"
                     )
+
 
                     send_telegram(msg)
 
