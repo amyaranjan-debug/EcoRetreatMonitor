@@ -6,30 +6,29 @@ import os
 # ECO RETREAT MULTI-HOTEL AVAILABILITY MONITOR
 # =====================================================
 
-# ---------------- CONFIG ----------------
+# ---------------------- CONFIG -----------------------
 
 API_URL = "https://admin.bookodisha.com/api/auth/hotel_details"
 
-# ✅ HOTELS TO WATCH
+# Monitor all hotels
 HOTEL_IDS = ["41", "37", "43"]
 
-# ✅ DATE RANGE TO SCAN
-WATCH_DATES = {
-    "2025-12-21",
-    "2025-12-22"
-}
-
-CHECKIN_START = datetime(2025, 12, 20)
-CHECKIN_END   = datetime(2025, 12, 24)
-
+# HOTEL ID → LOCATION MAPPING
 HOTEL_MAP = {
     "37": "Konark",
     "41": "Satkosia",
     "43": "Sonapur",
 }
 
+CHECKIN_START = datetime(2025, 12, 20)
+CHECKIN_END   = datetime(2025, 12, 24)
 
-# ✅ TELEGRAM SECRETS (FROM GITHUB)
+WATCH_DATES = {
+    "2025-12-21",
+    "2025-12-22",
+    "2025-12-23"
+}
+
 TELEGRAM_TOKEN = os.getenv("TG_TOKEN")
 CHAT_ID = os.getenv("TG_CHAT_ID")
 
@@ -41,17 +40,16 @@ HEADERS = {
 
 ALERT_LOG = "alert_log.txt"
 
-
 # =====================================================
 # TELEGRAM
 # =====================================================
 
 def send_telegram(msg):
-    
+
     print("[TG] sending message...")
-    
+
     if not TELEGRAM_TOKEN or not CHAT_ID:
-        print("[ERROR] TG_TOKEN or TG_CHAT_ID missing.")
+        print("[ERROR] TELEGRAM ENV VAR missing")
         return
 
     try:
@@ -63,15 +61,14 @@ def send_telegram(msg):
                 "text": msg,
                 "parse_mode": "HTML"
             },
-            timeout=10
+            timeout=10,
         )
-        print("[TG] ✅ delivered")
+        print("[TG] ✅ sent")
     except Exception as e:
         print("[TG] ❌ failed:", e)
 
-
 # =====================================================
-# ALERT TRACKING
+# ALERT MEMORY
 # =====================================================
 
 def already_alerted(key):
@@ -81,13 +78,13 @@ def already_alerted(key):
     except:
         return False
 
+
 def mark_alerted(key):
     with open(ALERT_LOG, "a") as f:
         f.write(key + "\n")
 
-
 # =====================================================
-# DATE HELPER
+# DATE GENERATOR
 # =====================================================
 
 def date_range(start, end):
@@ -95,16 +92,15 @@ def date_range(start, end):
         yield start.strftime("%Y-%m-%d")
         start += timedelta(days=1)
 
-
 # =====================================================
-# API CALL
+# API SCRAPER
 # =====================================================
 
 def get_availability(hotel_id, date_str):
 
     next_day = (
-        datetime.strptime(date_str, "%Y-%m-%d")
-        + timedelta(days=1)
+        datetime.strptime(date_str, "%Y-%m-%d") +
+        timedelta(days=1)
     ).strftime("%Y-%m-%d")
 
     payload = {
@@ -113,31 +109,28 @@ def get_availability(hotel_id, date_str):
         "hotelId": hotel_id,
         "roomRequest": '[{"adult":2,"child":0}]',
         "checkinDate": date_str,
-        "checkoutDate": next_day
+        "checkoutDate": next_day,
     }
 
     try:
         r = requests.post(
-            API_URL,
-            data=payload,
+            API_URL, payload,
             headers=HEADERS,
             timeout=15
         )
         data = r.json()
-
     except Exception as e:
         print("[API ERROR]", hotel_id, date_str, e)
         return []
 
     rooms = data.get("data", [])
-
     parsed = []
 
     for room in rooms:
         parsed.append({
-            "hotel_id": hotel_id,
+            "hotel": hotel_id,
             "date": date_str,
-            "weekday": datetime.strptime(date_str,"%Y-%m-%d").strftime("%A"),
+            "weekday": datetime.strptime(date_str, "%Y-%m-%d").strftime("%A"),
             "room": room.get("title"),
             "room_id": room.get("id"),
             "qty": room.get("quantity"),
@@ -147,50 +140,42 @@ def get_availability(hotel_id, date_str):
 
     return parsed
 
-
 # =====================================================
-# MAIN LOGIC
+# MAIN
 # =====================================================
 
 def main():
 
-    # ✅ SEND STARTUP TEST MESSAGE
-    send_telegram("✅ <b>Eco Retreat Monitor Started Successfully</b>\n\nCloud scheduler is running correctly!")
+    # ✅ TEST STARTUP MESSAGE
+    send_telegram(
+        "✅ <b>Eco Retreat Monitor is ACTIVE</b>\n"
+        "Monitoring Konark, Satkosia and Sonapur."
+    )
 
-    print("\n====== ECO RETREAT MONITOR RUN ======\n")
+    print("\n==== ECO RETREAT WATCH RUNNING ====\n")
 
-    for hotel_id in HOTEL_IDS:
+    for hotel in HOTEL_IDS:
 
-        print(f"\n--- CHECKING HOTEL {hotel_id} ---")
+        location = HOTEL_MAP.get(hotel, "Unknown")
+
+        print(f"--- HOTEL {hotel} → {location} ---")
 
         for d in date_range(CHECKIN_START, CHECKIN_END):
 
-            print(f"Checking {hotel_id} | {d}")
-
-            rooms = get_availability(hotel_id, d)
+            rooms = get_availability(hotel, d)
 
             for r in rooms:
 
                 if r["available"] == 1 and r["date"] in WATCH_DATES:
 
-                    alert_key = f"{r['hotel_id']}-{r['date']}-{r['room_id']}"
+                    key = f"{hotel}-{r['date']}-{r['room_id']}"
 
-                    if already_alerted(alert_key):
+                    if already_alerted(key):
                         continue
-
-                    # msg = (
-                    #     f"🏨 <b>ROOM AVAILABLE</b>\n"
-                    #     f"🏷 Hotel ID: {r['hotel_id']}\n"
-                    #     f"📅 {r['date']} ({r['weekday']})\n"
-                    #     f"🛏 {r['room']}\n"
-                    #     f"💰 ₹{r['price']}\n"
-                    #     f"📦 Qty: {r['qty']}"
-                    # )
-                    location = HOTEL_MAP.get(hotel, "Unknown")
 
                     msg = (
                         f"🏨 <b>ROOM AVAILABLE</b>\n"
-                        f"📍 Location: <b>{location}</b>\n"
+                        f"📍 <b>Location:</b> {location}\n"
                         f"🏷 Hotel ID: {hotel}\n"
                         f"📅 {r['date']} ({r['weekday']})\n"
                         f"🛏 {r['room']}\n"
@@ -198,14 +183,11 @@ def main():
                         f"📦 Qty: {r['qty']}"
                     )
 
-
                     send_telegram(msg)
+                    mark_alerted(key)
 
-                    mark_alerted(alert_key)
-
-    print("\n====== RUN COMPLETE ======\n")
+    print("\n==== RUN COMPLETE ====\n")
 
 
 if __name__ == "__main__":
     main()
-    
