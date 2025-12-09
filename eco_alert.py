@@ -14,11 +14,14 @@ API_URL = "https://admin.bookodisha.com/api/auth/hotel_details"
 HOTEL_IDS = ["41", "37", "43"]
 
 # ✅ DATE RANGE TO SCAN
-CHECKIN_START = datetime(2025, 12, 1)
-CHECKIN_END   = datetime(2026, 2, 28)
+WATCH_DATES = {
+    "2025-12-21",
+    "2025-12-22",
+    "2025-12-23"
+}
 
-# ✅ DATES YOU CARE ABOUT
-WATCH_DATES = {"2025-12-21", "2025-12-22", "2025-12-23"}
+CHECKIN_START = datetime(2025, 12, 20)
+CHECKIN_END   = datetime(2025, 12, 24)
 
 # ✅ TELEGRAM SECRETS (FROM GITHUB)
 TELEGRAM_TOKEN = os.getenv("TG_TOKEN")
