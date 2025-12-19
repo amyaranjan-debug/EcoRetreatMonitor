@@ -11,7 +11,7 @@ import os
 API_URL = "https://admin.bookodisha.com/api/auth/hotel_details"
 
 # Monitor all hotels
-HOTEL_IDS = ["41", "37", "43"]
+HOTEL_IDS = ["43"]
 
 # HOTEL ID → LOCATION MAPPING
 HOTEL_MAP = {
