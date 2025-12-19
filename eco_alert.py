@@ -20,12 +20,10 @@ HOTEL_MAP = {
     "43": "Sonapur",
 }
 
-CHECKIN_START = datetime(2025, 12, 19)
+CHECKIN_START = datetime(2025, 12, 21)
 CHECKIN_END   = datetime(2025, 12, 24)
 
 WATCH_DATES = {
-    "2025-12-20",
-    "2025-12-21",
     "2025-12-22",
     "2025-12-23"
 }
