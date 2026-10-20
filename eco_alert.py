@@ -110,7 +110,7 @@ def get_availability(hotel_id, date_str):
         "checkinDate": date_str,
         "checkoutDate": next_day,
     }
-
+    print(f'payload generated{payload}')
     try:
         r = requests.post(
             API_URL, payload,
