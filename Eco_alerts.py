@@ -8,10 +8,10 @@ import os
 API_URL = "https://admin.bookodisha.com/api/auth/hotel_details"
 HOTEL_ID = "41"
 
-CHECKIN_START = datetime(2025, 12, 1)
-CHECKIN_END   = datetime(2026, 2, 28)
+CHECKIN_START = datetime(2026, 11, 1)
+CHECKIN_END   = datetime(2028, 2, 28)
 
-WATCH_DATES = {"2025-12-21", "2025-12-22", "2025-12-23"}
+WATCH_DATES = {"2026-12-30", "2026-12-31", "2026-12-29","2026-12-28","2026-12-27","2026-12-26","2026-12-25","2026-11-01"}
 
 TELEGRAM_TOKEN = os.getenv("TG_TOKEN")
 CHAT_ID = os.getenv("TG_CHAT_ID")
