@@ -117,7 +117,9 @@ def get_availability(hotel_id, date_str):
             headers=HEADERS,
             timeout=15
         )
+        print('request posted to api server')
         data = r.json()
+        
     except Exception as e:
         print("[API ERROR]", hotel_id, date_str, e)
         return []
