@@ -25,7 +25,7 @@ CHECKIN_END   = datetime(2027, 02, 24)
 
 WATCH_DATES = {
     "2026-12-22",
-    "2025-12-23"
+    "2026-12-23"
 }
 
 TELEGRAM_TOKEN = os.getenv("TG_TOKEN")
