@@ -21,7 +21,7 @@ HOTEL_MAP = {
 }
 
 CHECKIN_START = datetime(2026, 11, 1)
-CHECKIN_END   = datetime(2027, 02, 24)
+CHECKIN_END   = datetime(2027, 2, 24)
 
 WATCH_DATES = {
     "2026-12-22",
